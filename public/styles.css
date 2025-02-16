@@ -1,0 +1,10 @@
+:root {
+    --black-color: #000000;
+}
+
+*, *:before, *:after {
+    text-decoration: none;
+    box-sizing: border-box;
+    margin: 20rem;
+    padding: 0;
+}
