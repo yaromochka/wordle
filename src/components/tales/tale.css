@@ -6,6 +6,8 @@
     align-items: center;
     justify-content: center;
 
-    border: 3px solid #000;
+    border: 3px solid #666;
 
+    font-family: "Arial", sans-serif;
+    font-size: 2rem;
 }

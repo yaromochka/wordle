@@ -1,11 +1,11 @@
 import "./tale.css"
 
 
-export default function Tale() {
+export function Tale({ letter }: { letter: string }) {
     return (
         <>
             <div className="tale">
-                R
+                { letter.toUpperCase() }
             </div>
         </>
     )
