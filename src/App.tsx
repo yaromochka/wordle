@@ -1,12 +1,14 @@
 import './App.css';
-import {Border} from "./components/border/border";
+import Grid from "./components/Grid/Grid";
 
 function App() {
-  return (
-      <>
-        <Border />
-      </>
-  );
+    return (
+        <>
+            <div className="game">
+                <Grid/>
+            </div>
+        </>
+    );
 }
 
 export default App;

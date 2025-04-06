@@ -1,10 +1,13 @@
 :root {
-    --black-color: #000000;
+    --black-color: #121213;
+    --empty: #3a3a3c;
+    --wrong: #b59f3b;
+    --right: #538d4e;
+    --white: #fff;
 }
 
 *, *:before, *:after {
     text-decoration: none;
     box-sizing: border-box;
-    margin: 20rem;
     padding: 0;
 }
