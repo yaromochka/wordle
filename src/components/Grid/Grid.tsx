@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import './Grid.css';
 import Box from "../Box/Box";
 import words from 'russian-words';
@@ -20,8 +20,15 @@ function Grid() {
     const [currentRow, setCurrentRow] = useState(0);
     const [currentWord, setCurrentWord] = useState('');
     const [result, setResult] = useState<Array<string[]>>(new Array(totalRows).fill([])); // Массив для результатов проверки
+    const [gameOver, setGameOver] = useState(false); // Статус игры (игра закончена или нет)
+    const [wordGuessed, setWordGuessed] = useState(false); // Статус, угадано ли слово
+    const [shake, setShake] = useState(false); // Статус анимации "тряски"
 
     const checkWord = (word: string) => {
+        if (!fiveLetterWords.includes(word)) {
+            return [];
+        }
+
         const rowResult = Array(wordLength).fill('empty'); // Массив для результата текущего слова
         let secretCopy = secret.split('');
 
@@ -44,6 +51,8 @@ function Grid() {
 
     // Обработчик ввода с клавиатуры
     useEffect(() => {
+        if (gameOver || wordGuessed) return;
+
         const handleKeyDown = (e: KeyboardEvent) => {
             const key = e.key;
 
@@ -65,21 +74,36 @@ function Grid() {
 
                 setLetters(updatedLetters);
                 setCurrentWord(newWord);
-            }
-            else if (key === 'Enter') {
+            } else if (key === 'Enter') {
                 if (currentWord.length === wordLength) {
                     const currentResult = checkWord(currentWord);
-                    const updatedResult = [...result];
-                    updatedResult[currentRow] = currentResult;
-                    setResult(updatedResult);
 
-                    if (currentRow < totalRows - 1) {
-                        setCurrentRow(currentRow + 1);
-                        setCurrentWord('');
+                    if (currentResult.length > 0 && fiveLetterWords.includes(currentWord)) {
+                        // Если слово существует в fiveLetterWords, обновляем результат
+                        const updatedResult = [...result];
+                        updatedResult[currentRow] = currentResult;
+                        setResult(updatedResult);
+
+                        // Если угадано, заканчиваем игру
+                        if (currentWord === secret) {
+                            setWordGuessed(true);
+                            setGameOver(true);
+                        }
+
+                        if (currentRow < totalRows - 1) {
+                            setCurrentRow(currentRow + 1);
+                            setCurrentWord('');
+                        } else {
+                            setGameOver(true);
+                        }
+
+                    } else {
+                        // Если слово не существует, включаем анимацию "тряски" и не двигаемся на следующую строку
+                        setShake(true);
+                        setTimeout(() => setShake(false), 500); // Тряска длится 500ms
                     }
                 }
-            }
-            else if (key === 'Backspace') {
+            } else if (key === 'Backspace') {
                 if (currentWord.length > 0) {
                     const newWord = currentWord.slice(0, -1);
                     const updatedLetters = [...letters];
@@ -95,19 +119,30 @@ function Grid() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [currentWord, currentRow, letters, result]);
+    }, [currentWord, currentRow, letters, result, gameOver, wordGuessed]);
 
     return (
-        <div className="grid">
+        <div className={`grid ${shake ? 'shake' : ''}`}>
             {letters.map((letter, index) => {
                 const row = Math.floor(index / wordLength);
                 const status = result[row]?.[index % wordLength] || 'empty'; // Получаем статус для текущей ячейки
+                const hasFlip = status === 'right' || status === 'wrong'; // Условие для переворота
                 return (
-                    <Box key={index} letter={letter} status={status} />
+                    <Box
+                        key={index}
+                        letter={letter}
+                        status={status}
+                        hasFlip={hasFlip} // Передаем флаг переворота
+                    />
                 );
             })}
+            {gameOver && (
+                <div className="game-over">
+                    {wordGuessed ? "Вы угадали слово!" : "Попытки закончились!"}
+                </div>
+            )}
         </div>
-    );
+    )
 }
 
 export default Grid;

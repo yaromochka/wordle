@@ -22,3 +22,19 @@
 .right {
     background-color: var(--right);
 }
+
+.box.flip {
+    animation: flipper 0.5s ease-in-out;
+}
+
+@keyframes flipper {
+    0% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(0);
+    }
+    100% {
+        transform: scaleY(1);
+    }
+}
