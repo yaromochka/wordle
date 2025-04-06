@@ -1,0 +1,44 @@
+.keyboard {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+    align-items: center;
+}
+
+.keyboard-row {
+    display: flex;
+    gap: .5rem;
+}
+
+.key {
+    height: 3.5rem;
+    width: 3.5rem;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ccc;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-transform: uppercase;
+}
+
+.key.right {
+    background-color: var(--right);
+    color: var(--white);
+}
+
+.key.wrong {
+    background-color: var(--wrong);
+    color: var(--white);
+}
+
+.key.empty {
+    background-color: var(--empty);
+    color: var(--white);
+}
+
+.key.special {
+    min-width: 5rem;
+}
