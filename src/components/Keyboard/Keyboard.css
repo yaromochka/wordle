@@ -12,13 +12,14 @@
 }
 
 .key {
+    user-select: none;
     height: 3.5rem;
     width: 3.5rem;
     padding: 10px 14px;
     border: none;
     border-radius: 5px;
     background-color: #ccc;
-    font-size: 16px;
+    font-size: 24px;
     cursor: pointer;
     transition: background-color 0.2s;
     text-transform: uppercase;
@@ -40,5 +41,5 @@
 }
 
 .key.special {
-    min-width: 5rem;
+    min-width: 6.5rem;
 }

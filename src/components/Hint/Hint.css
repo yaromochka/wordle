@@ -1,0 +1,21 @@
+.hint-box {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #1e1e1e;
+    padding: 10px 15px;
+    border-radius: 10px;
+    color: white;
+    max-width: 220px;
+    box-shadow: 0 0 5px #000;
+}
+
+.hint-box ul {
+    padding-left: 18px;
+    margin: 0;
+}
+
+.hint-box h3 {
+    font-size: 1.1em;
+    margin-bottom: 6px;
+}

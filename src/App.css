@@ -2,17 +2,30 @@ body {
     background: var(--black);
 }
 
-.header {
+.main__container {
     width: 100%;
     display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.header {
+    width: 50%;
+    display: flex;
+    gap: 1rem;
     padding-bottom: .3rem;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 0.1rem solid var(--empty);
+}
+
+.header__title {
     font-family: "Arial", sans-serif;
     letter-spacing: .4rem;
     font-weight: bold;
     font-size: 3rem;
     color: var(--white);
-    border-bottom: 0.1rem solid var(--empty);
+    user-select: none;
 }
 
 .game {
@@ -22,4 +35,14 @@ body {
     height: 600px;
     margin-top: 1.5rem;
     gap: 1rem;
+}
+
+.clickable {
+    cursor: pointer;
+    transition: scale 0.3s;
+}
+
+.clickable:hover {
+    scale: 1.2;
+    transition: scale 0.3s;
 }

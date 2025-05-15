@@ -1,19 +1,79 @@
 import './App.css';
-import Grid from "./components/Grid/Grid";
-import {useState} from "react";
+import Grid, {secret} from "./components/Grid/Grid";
+import React, {useEffect, useState} from "react";
 import Keyboard from "./components/Keyboard/Keyboard";
+import SettingsModal from "./components/SettingsModal/SettingsModal";
+import Hint from "./components/Hint/Hint";
+import Cookies from "js-cookie";
+import {Attempt} from "./helpers/solver";
 
 function App() {
-    const [onKeyPress, setOnKeyPress] = useState<(key: string) => void>(() => () => {});
+    const [onKeyPress, setOnKeyPress] = useState<(key: string) => void>(() => () => {
+    });
     const [usedKeys, setUsedKeys] = useState<Record<string, string>>({});
+    const [gameId, setGameId] = useState<number>(0); // ключ для перезапуска игры
+    const [isHintsEnabled, setIsHintsEnabled] = useState<boolean>(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [attempts, setAttempts] = useState<Attempt[]>([]);
+
+    // Получаем состояние "включить подсказки" из куки
+    useEffect(() => {
+        const hintsEnabled = Cookies.get('hintsEnabled') === 'true';
+        setIsHintsEnabled(hintsEnabled);
+    }, []);
+
+    // Сохраняем состояние "включить подсказки" в куки
+    const handleHintsToggle = () => {
+        setIsHintsEnabled((prev) => {
+            const newState = !prev;
+            Cookies.set('hintsEnabled', newState.toString());
+            return newState;
+        });
+    };
+
+    const onRestartPress = () => {
+        setUsedKeys({});
+        setGameId(prev => prev + 1);
+        setAttempts([])
+    };
 
     return (
         <>
-            <div className="header">WORDLE</div>
-            <div className="game">
-                <Grid setOnKeyPress={setOnKeyPress} setUsedKeys={setUsedKeys} usedKeys={usedKeys} />
-                <Keyboard onKeyPress={onKeyPress} usedLetters={usedKeys} />
+            <div className="main__container">
+                <div className="header">
+                    <div className="headers__settings clickable" onClick={() => setIsSettingsOpen(true)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px"
+                             fill="#e3e3e3">
+                            <path
+                                d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/>
+                        </svg>
+                    </div>
+                    <div className="header__title">WORDLE</div>
+                    <div className="header__repeat clickable" onClick={onRestartPress}>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px"
+                             fill="#e3e3e3">
+                            <path
+                                d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440h80q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720h-6l62 62-56 58-160-160 160-160 56 58-62 62h6q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div className="game">
+                    <Grid
+                        key={gameId}
+                        setOnKeyPress={setOnKeyPress}
+                        setUsedKeys={setUsedKeys}
+                        usedKeys={usedKeys}
+                        setAttempts={setAttempts}
+                    />
+
+                    <Keyboard
+                        onKeyPress={onKeyPress}
+                        usedLetters={usedKeys}
+                    />
+                </div>
             </div>
+            {isHintsEnabled && <Hint attempts={attempts} />}
+            {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)}/>}
         </>
     );
 }

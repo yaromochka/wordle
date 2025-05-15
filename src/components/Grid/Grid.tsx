@@ -1,19 +1,35 @@
-import { useEffect, useState } from 'react';
+// Grid.tsx
+import {useCallback, useEffect, useState} from 'react';
 import Box from "../Box/Box";
 import words from 'russian-words';
 import './Grid.css';
+import {Attempt} from "../../helpers/solver";
 
-const fiveLetterWords = words.filter((word: string) => word.length === 5 && /^[а-яё]+$/i.test(word));
-const secret = fiveLetterWords[Math.floor(Math.random() * fiveLetterWords.length)];
+export const fiveLetterWords = words.filter((word: string) => word.length === 5 && /^[а-яё]+$/i.test(word));
+export let secret = ''
+
+function getRandomWord() {
+    return fiveLetterWords[Math.floor(Math.random() * fiveLetterWords.length)];
+}
+
+function setTargetWord(word: string) {
+    secret = word
+}
 
 function isRussianLetter(key: string) {
     return /^[а-яА-ЯёЁ]$/.test(key);
 }
 
-function Grid({ setOnKeyPress, usedKeys, setUsedKeys }: {
+function Grid({
+                  setOnKeyPress,
+                  usedKeys,
+                  setUsedKeys,
+                  setAttempts
+              }: {
     setOnKeyPress: (fn: (key: string) => void) => void;
     usedKeys: Record<string, string>;
     setUsedKeys: (map: Record<string, string>) => void;
+    setAttempts: React.Dispatch<React.SetStateAction<Attempt[]>>;
 }) {
     const totalRows = 6;
     const wordLength = 5;
@@ -26,6 +42,10 @@ function Grid({ setOnKeyPress, usedKeys, setUsedKeys }: {
     const [gameOver, setGameOver] = useState(false);
     const [wordGuessed, setWordGuessed] = useState(false);
     const [shake, setShake] = useState(false);
+
+    useEffect(() => {
+        setTargetWord(getRandomWord());
+    }, []);
 
     const checkWord = (word: string) => {
         if (!fiveLetterWords.includes(word)) {
@@ -70,7 +90,7 @@ function Grid({ setOnKeyPress, usedKeys, setUsedKeys }: {
         setUsedKeys(updated);
     };
 
-    const handleKeyPress = (key: string) => {
+    const handleKeyPress = useCallback((key: string) => {
         if (gameOver || wordGuessed) return;
 
         if (isRussianLetter(key)) {
@@ -94,6 +114,13 @@ function Grid({ setOnKeyPress, usedKeys, setUsedKeys }: {
                 const currentResult = checkWord(currentWord);
 
                 if (currentResult.length > 0 && fiveLetterWords.includes(currentWord)) {
+                    // Добавляем попытку
+                    const newAttempt: Attempt = {
+                        word: currentWord,
+                        result: currentResult
+                    };
+                    setAttempts(prev => [...prev, newAttempt]);
+
                     const updatedResult = [...result];
                     updatedResult[currentRow] = currentResult;
                     setResult(updatedResult);
@@ -128,7 +155,7 @@ function Grid({ setOnKeyPress, usedKeys, setUsedKeys }: {
                 setCurrentWord(newWord);
             }
         }
-    };
+    }, [currentRow, currentWord, letters]);
 
     useEffect(() => {
         setOnKeyPress(() => handleKeyPress);
@@ -145,21 +172,8 @@ function Grid({ setOnKeyPress, usedKeys, setUsedKeys }: {
             {letters.map((letter, index) => {
                 const row = Math.floor(index / wordLength);
                 const status = result[row]?.[index % wordLength] || 'empty';
-                const hasFlip = status === 'right' || status === 'wrong';
-                return (
-                    <Box
-                        key={index}
-                        letter={letter}
-                        status={status}
-                        hasFlip={hasFlip}
-                    />
-                );
+                return <Box key={index} letter={letter} status={status} hasFlip={false}/>;
             })}
-            {gameOver && (
-                <div className="game-over">
-                    {wordGuessed ? "Вы угадали слово!" : "Попытки закончились!"}
-                </div>
-            )}
         </div>
     );
 }
