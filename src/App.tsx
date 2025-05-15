@@ -1,6 +1,6 @@
 import './App.css';
-import Grid, {secret} from "./components/Grid/Grid";
-import React, {useEffect, useState} from "react";
+import Grid from "./components/Grid/Grid";
+import React, {useState} from "react";
 import Keyboard from "./components/Keyboard/Keyboard";
 import SettingsModal from "./components/SettingsModal/SettingsModal";
 import Hint from "./components/Hint/Hint";
@@ -12,15 +12,13 @@ function App() {
     });
     const [usedKeys, setUsedKeys] = useState<Record<string, string>>({});
     const [gameId, setGameId] = useState<number>(0); // ключ для перезапуска игры
-    const [isHintsEnabled, setIsHintsEnabled] = useState<boolean>(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [attempts, setAttempts] = useState<Attempt[]>([]);
 
-    // Получаем состояние "включить подсказки" из куки
-    useEffect(() => {
-        const hintsEnabled = Cookies.get('hintsEnabled') === 'true';
-        setIsHintsEnabled(hintsEnabled);
-    }, []);
+    const [isHintsEnabled, setIsHintsEnabled] = useState<boolean>(() => {
+        return Cookies.get('hintsEnabled') === 'true';
+    });
+
 
     // Сохраняем состояние "включить подсказки" в куки
     const handleHintsToggle = () => {
@@ -73,7 +71,11 @@ function App() {
                 </div>
             </div>
             {isHintsEnabled && <Hint attempts={attempts} />}
-            {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)}/>}
+            {isSettingsOpen &&   <SettingsModal
+                onClose={() => setIsSettingsOpen(false)}
+                hintsEnabled={isHintsEnabled}
+                toggleHints={handleHintsToggle}
+            />}
         </>
     );
 }

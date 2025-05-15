@@ -6,7 +6,6 @@ export type Attempt = { word: string; result: Feedback[] };
 const allWords = words.filter((w: string | any[]) => w.length === 5 && /^[а-яё]+$/i.test(<string>w));
 
 function getFeedback(guess: string, solution: string): Feedback[] {
-    // твой оригинальный код
     const result: Feedback[] = Array(5).fill('empty');
     const used = Array(5).fill(false);
 
@@ -40,10 +39,7 @@ function filterWords(words: string[], attempts: Attempt[]): string[] {
     });
 }
 
-// Считаем частоты букв по позициям (или по всему слову)
 function countLetterFrequencies(words: string[]): number[][] {
-    // 33 буквы русского алфавита, но для упрощения
-    // используем код 0..32 по буквам а-яё
     const ALPHABET = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
     const freq = Array.from({ length: 5 }, () => Array(ALPHABET.length).fill(0));
 
@@ -61,23 +57,56 @@ function countLetterFrequencies(words: string[]): number[][] {
 function scoreWord(word: string, freq: number[][]): number {
     const ALPHABET = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
     let score = 0;
+    const seen = new Set<string>(); // Для учета уникальных букв (опционально)
     for (let i = 0; i < 5; i++) {
-        const index = ALPHABET.indexOf(word[i]);
-        if (index >= 0) score += freq[i][index];
+        const char = word[i];
+        if (!seen.has(char)) {
+            const index = ALPHABET.indexOf(char);
+            if (index >= 0) {
+                score += freq[i][index];
+                seen.add(char);
+            }
+        }
     }
     return score;
 }
 
-export function getTopWords(attempts: Attempt[], topN = 5): { word: string; score: number }[] {
+function calculateEntropy(candidate: string, possibleWords: string[]): number {
+    const patternCount: Record<string, number> = {};
+
+    for (const solution of possibleWords) {
+        const feedback = getFeedback(candidate, solution).join('');
+        patternCount[feedback] = (patternCount[feedback] || 0) + 1;
+    }
+
+    const total = possibleWords.length;
+    let entropy = 0;
+
+    for (const count of Object.values(patternCount)) {
+        const p = count / total;
+        entropy -= p * Math.log2(p);
+    }
+
+    return entropy;
+}
+
+export function getTopWords(attempts: Attempt[], topN = 5): { word: string; entropy: number }[] {
     const filtered = filterWords(allWords, attempts);
 
-    // Если попыток ещё мало — считаем частоты по всему словарю, иначе по оставшимся
-    const freq = countLetterFrequencies(filtered);
-
-    const scored = filtered.map(word => ({
-        word,
-        score: scoreWord(word, freq),
-    }));
-
-    return scored.sort((a, b) => b.score - a.score).slice(0, topN);
+    if (filtered.length > 1000) {
+        // Частотный анализ — быстро, score — сумма частот букв
+        const freq = countLetterFrequencies(filtered);
+        const scored = filtered.map(word => ({
+            word,
+            entropy: scoreWord(word, freq), // тут entropy — сумма частот
+        }));
+        return scored.sort((a, b) => b.entropy - a.entropy).slice(0, topN);
+    } else {
+        // Энтропия — точнее, но дольше
+        const scored = filtered.map(word => ({
+            word,
+            entropy: calculateEntropy(word, filtered),
+        }));
+        return scored.sort((a, b) => b.entropy - a.entropy).slice(0, topN);
+    }
 }

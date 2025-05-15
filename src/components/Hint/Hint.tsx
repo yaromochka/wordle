@@ -16,9 +16,9 @@ const Hint: React.FC<HintProps> = ({ attempts }) => {
                 <p>Недостаточно данных для подсказки...</p>
             ) : (
                 <ul>
-                    {topWords.map(({ word }, idx) => (
+                    {topWords.map(({ word, entropy }, idx) => (
                         <li key={idx}>
-                            <strong>{word}</strong> — энтропия: {1}
+                            <strong>{word}</strong> — энтропия: {entropy.toFixed(3)}
                         </li>
                     ))}
                 </ul>

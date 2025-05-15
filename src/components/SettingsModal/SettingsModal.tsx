@@ -1,28 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import './SettingsModal.css';
-import Cookies from 'js-cookie';
+import React from "react";
+import './SettingsModal.css'
 
 interface SettingsModalProps {
     onClose: () => void;
+    hintsEnabled: boolean;         // Передаём текущее состояние
+    toggleHints: () => void;       // Передаём функцию переключения
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
-    const [hintsEnabled, setHintsEnabled] = useState(false);
-
-    // Загружаем значение из cookies при монтировании
-    useEffect(() => {
-        const savedHints = Cookies.get('hintsEnabled');
-        if (savedHints) {
-            setHintsEnabled(savedHints === 'true');
-        }
-    }, []);
-
-    const toggleHints = () => {
-        const newValue = !hintsEnabled;
-        setHintsEnabled(newValue);
-        Cookies.set('hintsEnabled', String(newValue), { expires: 365 });
-    };
-
+const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, hintsEnabled, toggleHints }) => {
     return (
         <div className="modal__overlay">
             <div className="modal__content">
@@ -39,7 +24,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                             <input
                                 type="checkbox"
                                 checked={hintsEnabled}
-                                onChange={toggleHints}
+                                onChange={toggleHints}    // Вызов функции из пропсов
                             />
                             <span className="slider" />
                         </label>
